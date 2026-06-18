@@ -1,0 +1,18 @@
+# Local runtime logs
+*.log
+php-server.out.log
+php-server.err.log
+
+# Local database exports/backups
+*_backup.sql
+magerwa_vehicle_tracking_backup.sql
+
+# OS/editor noise
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Environment files
+.env
+
