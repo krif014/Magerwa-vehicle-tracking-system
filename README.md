@@ -218,7 +218,7 @@ Magerwa/
 ## 1. Clone the Repository
 
 ```bash
-git clone https://github.com/yourusername/magerwa-vehicle-tracking.git
+git clone https://github.com/krif014/Magerwa-vehicle-tracking-system.git
 ```
 
 or copy the project folder into:
