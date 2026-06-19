@@ -26,7 +26,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $errors = [];
     if ($clientId <= 0) $errors[] = 'Please select a client.';
     if ($vehicleId <= 0) $errors[] = 'Please select a vehicle.';
-    if (!valid_plate_number($plate)) $errors[] = 'Plate number must be 3 to 30 letters, numbers, spaces, or hyphens.';
+    if (!valid_plate_number($plate)) $errors[] = 'Plate number must follow the Rwanda format, for example RAA 123 A.';
 
     if (!$errors) {
         try {
@@ -105,8 +105,8 @@ require __DIR__ . '/includes/header.php';
 </div>
 
 <div class="row g-4">
-    <div class="col-lg-4">
-        <section class="content-panel p-3 p-lg-4">
+    <div class="col-xxl-4">
+        <section class="content-panel registry-side-panel p-3 p-lg-4">
             <h2 class="h5 mb-3"><i class="bi bi-link-45deg me-2 text-teal"></i>Link vehicle</h2>
             <form method="post" class="vstack gap-3">
                 <input type="hidden" name="csrf_token" value="<?= e(csrf_token()) ?>">
@@ -131,12 +131,12 @@ require __DIR__ . '/includes/header.php';
                 </div>
                 <div>
                     <label class="form-label">Unique plate number</label>
-                    <input class="form-control text-uppercase" name="plate_number" placeholder="RAA 123 A" minlength="3" maxlength="30" pattern="[A-Za-z0-9 -]{3,30}" required>
+                    <input class="form-control text-uppercase" name="plate_number" placeholder="RAA 123 A" minlength="9" maxlength="9" pattern="R[A-Za-z]{2} [0-9]{3} [A-Za-z]" required>
                 </div>
                 <button class="btn btn-primary"><i class="bi bi-check2-circle me-1"></i>Assign vehicle</button>
             </form>
         </section>
-        <section class="content-panel p-3 p-lg-4 mt-4">
+        <section class="content-panel registry-side-panel p-3 p-lg-4 mt-4">
             <h2 class="h5 mb-3"><i class="bi bi-shield-check me-2 text-teal"></i>Assignment rules</h2>
             <ul class="rule-list">
                 <li><i class="bi bi-check-circle-fill"></i>A vehicle can only be linked to one active client.</li>
@@ -146,7 +146,7 @@ require __DIR__ . '/includes/header.php';
             </ul>
         </section>
     </div>
-    <div class="col-lg-8">
+    <div class="col-xxl-8">
         <section class="content-panel p-3 p-lg-4">
             <div class="d-flex justify-content-between align-items-center mb-3">
                 <h2 class="h5 mb-0"><i class="bi bi-card-checklist me-2 text-teal"></i>Linked records</h2>
@@ -227,7 +227,7 @@ require __DIR__ . '/includes/header.php';
                                                     </div>
                                                     <div>
                                                         <label class="form-label">Unique plate number</label>
-                                                        <input class="form-control text-uppercase" name="plate_number" minlength="3" maxlength="30" pattern="[A-Za-z0-9 -]{3,30}" value="<?= e($record['plate_number']) ?>" required>
+                                                        <input class="form-control text-uppercase" name="plate_number" minlength="9" maxlength="9" pattern="R[A-Za-z]{2} [0-9]{3} [A-Za-z]" value="<?= e($record['plate_number']) ?>" required>
                                                     </div>
                                                 </div>
                                                 <div class="modal-footer">
