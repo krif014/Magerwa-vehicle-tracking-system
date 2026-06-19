@@ -33,8 +33,8 @@ function validate_client_payload(array $data): array
     $address = clean_string($data['address'] ?? '');
 
     if ($names === '') validation_error('Client names are required.');
-    if (!valid_national_id($nationalId)) validation_error('National ID must be 8 to 30 letters, numbers, or hyphens.');
-    if (!valid_phone_number($telephone)) validation_error('Telephone must contain 7 to 20 digits and may start with +.');
+    if (!valid_national_id($nationalId)) validation_error('National ID must be 8 to 30 digits.');
+    if (!valid_phone_number($telephone)) validation_error('Telephone must contain 7 to 15 digits, may start with +, and may use spaces or hyphens between digits.');
     if ($address === '') validation_error('Address is required.');
 
     return [$names, $nationalId, $telephone, $address];
@@ -48,10 +48,10 @@ function validate_vehicle_payload(array $data): array
     $price = (float) ($data['price'] ?? -1);
     $model = clean_string($data['model_name'] ?? '');
 
-    if (!valid_chassis_number($chassis)) validation_error('Chassis number must be 6 to 80 letters, numbers, or hyphens.');
+    if (!valid_chassis_number($chassis)) validation_error('Chassis/VIN must be 17 letters or numbers and cannot include I, O, or Q.');
     if ($company === '') validation_error('Manufacture company is required.');
-    if (!valid_year($year)) validation_error('Manufacture year is invalid.');
-    if (!valid_price($price)) validation_error('Price must be a valid positive amount.');
+    if (!valid_year($year)) validation_error('Manufacture year must be between 1901 and the current year.');
+    if (!valid_price($price)) validation_error('Price must be greater than zero.');
     if ($model === '') validation_error('Model name is required.');
 
     return [$chassis, $company, $year, $price, $model];
@@ -65,7 +65,7 @@ function validate_link_payload(array $data): array
 
     if ($clientId <= 0) validation_error('Client ID is required.');
     if ($vehicleId <= 0) validation_error('Vehicle ID is required.');
-    if (!valid_plate_number($plate)) validation_error('Plate number must be 3 to 30 letters, numbers, spaces, or hyphens.');
+    if (!valid_plate_number($plate)) validation_error('Plate number must follow the Rwanda format, for example RAA 123 A.');
 
     return [$clientId, $vehicleId, $plate];
 }
