@@ -26,8 +26,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     $errors = [];
     if ($names === '') $errors[] = 'Client names are required.';
-    if (!valid_national_id($nationalId)) $errors[] = 'National ID must be 8 to 30 letters, numbers, or hyphens.';
-    if (!valid_phone_number($telephone)) $errors[] = 'Telephone must contain 7 to 20 digits and may start with +.';
+    if (!valid_national_id($nationalId)) $errors[] = 'National ID must be 8 to 30 digits.';
+    if (!valid_phone_number($telephone)) $errors[] = 'Telephone must contain 7 to 15 digits, may start with +, and may use spaces or hyphens between digits.';
     if ($address === '') $errors[] = 'Address is required.';
 
     if (!$errors) {
@@ -51,7 +51,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-$clients = db()->query('SELECT * FROM clients ORDER BY created_at DESC')->fetchAll();
+$perPage = 8;
+$page = max(1, (int) ($_GET['page'] ?? 1));
+$total = (int) db()->query('SELECT COUNT(*) FROM clients')->fetchColumn();
+$pages = max(1, (int) ceil($total / $perPage));
+$page = min($page, $pages);
+$offset = ($page - 1) * $perPage;
+
+$stmt = db()->prepare('SELECT * FROM clients ORDER BY created_at DESC LIMIT :limit OFFSET :offset');
+$stmt->bindValue(':limit', $perPage, PDO::PARAM_INT);
+$stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
+$stmt->execute();
+$clients = $stmt->fetchAll();
 require __DIR__ . '/includes/header.php';
 ?>
 <div class="page-heading d-flex justify-content-between align-items-start mb-4">
@@ -63,8 +74,8 @@ require __DIR__ . '/includes/header.php';
 </div>
 
 <div class="row g-4">
-    <div class="col-lg-4">
-        <section class="content-panel p-3 p-lg-4">
+    <div class="col-xxl-4">
+        <section class="content-panel registry-side-panel p-3 p-lg-4">
             <h2 class="h5 mb-3"><i class="bi bi-person-plus me-2 text-teal"></i>Register client</h2>
             <form method="post" class="vstack gap-3">
                 <input type="hidden" name="csrf_token" value="<?= e(csrf_token()) ?>">
@@ -75,11 +86,11 @@ require __DIR__ . '/includes/header.php';
                 </div>
                 <div>
                     <label class="form-label">National ID</label>
-                    <input class="form-control" name="national_id" minlength="8" maxlength="30" pattern="[A-Za-z0-9-]{8,30}" required>
+                    <input class="form-control" name="national_id" minlength="8" maxlength="30" pattern="[0-9]{8,30}" inputmode="numeric" required>
                 </div>
                 <div>
                     <label class="form-label">Telephone</label>
-                    <input class="form-control" type="tel" name="telephone" pattern="\+?[0-9\s-]{7,20}" required>
+                    <input class="form-control" type="tel" name="telephone" pattern="\+?[0-9][0-9 -]{5,18}[0-9]" required>
                 </div>
                 <div>
                     <label class="form-label">Address</label>
@@ -89,9 +100,12 @@ require __DIR__ . '/includes/header.php';
             </form>
         </section>
     </div>
-    <div class="col-lg-8">
+    <div class="col-xxl-8">
         <section class="content-panel p-3 p-lg-4">
-            <h2 class="h5 mb-3"><i class="bi bi-people me-2 text-teal"></i>Registered clients</h2>
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h2 class="h5 mb-0"><i class="bi bi-people me-2 text-teal"></i>Registered clients</h2>
+                <span class="text-secondary small"><?= $total ?> total</span>
+            </div>
             <div class="table-responsive">
                 <table class="table table-hover">
                     <thead>
@@ -138,11 +152,11 @@ require __DIR__ . '/includes/header.php';
                                                     </div>
                                                     <div>
                                                         <label class="form-label">National ID</label>
-                                                        <input class="form-control" name="national_id" minlength="8" maxlength="30" pattern="[A-Za-z0-9-]{8,30}" value="<?= e($client['national_id']) ?>" required>
+                                                        <input class="form-control" name="national_id" minlength="8" maxlength="30" pattern="[0-9]{8,30}" inputmode="numeric" value="<?= e($client['national_id']) ?>" required>
                                                     </div>
                                                     <div>
                                                         <label class="form-label">Telephone</label>
-                                                        <input class="form-control" type="tel" name="telephone" pattern="\+?[0-9\s-]{7,20}" value="<?= e($client['telephone']) ?>" required>
+                                                        <input class="form-control" type="tel" name="telephone" pattern="\+?[0-9][0-9 -]{5,18}[0-9]" value="<?= e($client['telephone']) ?>" required>
                                                     </div>
                                                     <div>
                                                         <label class="form-label">Address</label>
@@ -189,6 +203,17 @@ require __DIR__ . '/includes/header.php';
                     </tbody>
                 </table>
             </div>
+            <?php if ($pages > 1): ?>
+                <nav aria-label="Clients pagination">
+                    <ul class="pagination mb-0">
+                        <?php for ($i = 1; $i <= $pages; $i++): ?>
+                            <li class="page-item <?= $i === $page ? 'active' : '' ?>">
+                                <a class="page-link" href="?page=<?= $i ?>"><?= $i ?></a>
+                            </li>
+                        <?php endfor; ?>
+                    </ul>
+                </nav>
+            <?php endif; ?>
         </section>
     </div>
 </div>
