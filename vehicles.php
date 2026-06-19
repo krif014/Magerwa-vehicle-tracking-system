@@ -15,7 +15,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $year = (int) ($_POST['manufacture_year'] ?? 0);
     $price = (float) ($_POST['price'] ?? 0);
     $model = clean_string($_POST['model_name'] ?? '');
-    $currentYear = (int) date('Y') + 1;
+    $currentYear = (int) date('Y');
     $vehicleId = (int) ($_POST['vehicle_id'] ?? 0);
 
     if ($action === 'delete' && $vehicleId > 0) {
@@ -27,10 +27,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     $errors = [];
-    if (!valid_chassis_number($chassis)) $errors[] = 'Chassis number must be 6 to 80 letters, numbers, or hyphens.';
+    if (!valid_chassis_number($chassis)) $errors[] = 'Chassis/VIN must be 17 letters or numbers and cannot include I, O, or Q.';
     if ($company === '') $errors[] = 'Manufacture company is required.';
-    if (!valid_year($year)) $errors[] = 'Manufacture year must be between 1900 and ' . $currentYear . '.';
-    if (!valid_price($price)) $errors[] = 'Price must be a valid positive amount.';
+    if (!valid_year($year)) $errors[] = 'Manufacture year must be between 1901 and ' . $currentYear . '.';
+    if (!valid_price($price)) $errors[] = 'Price must be greater than zero.';
     if ($model === '') $errors[] = 'Model name is required.';
 
     if (!$errors) {
@@ -61,12 +61,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-$vehicles = db()->query(
+$perPage = 8;
+$page = max(1, (int) ($_GET['page'] ?? 1));
+$total = (int) db()->query('SELECT COUNT(*) FROM vehicles')->fetchColumn();
+$pages = max(1, (int) ceil($total / $perPage));
+$page = min($page, $pages);
+$offset = ($page - 1) * $perPage;
+
+$stmt = db()->prepare(
     'SELECT v.*, l.plate_number
      FROM vehicles v
      LEFT JOIN vehicle_client_links l ON l.vehicle_id = v.id
-     ORDER BY v.created_at DESC'
-)->fetchAll();
+     ORDER BY v.created_at DESC
+     LIMIT :limit OFFSET :offset'
+);
+$stmt->bindValue(':limit', $perPage, PDO::PARAM_INT);
+$stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
+$stmt->execute();
+$vehicles = $stmt->fetchAll();
 require __DIR__ . '/includes/header.php';
 ?>
 <div class="page-heading d-flex justify-content-between align-items-start mb-4">
@@ -78,15 +90,15 @@ require __DIR__ . '/includes/header.php';
 </div>
 
 <div class="row g-4">
-    <div class="col-lg-4">
-        <section class="content-panel p-3 p-lg-4">
+    <div class="col-xxl-4">
+        <section class="content-panel registry-side-panel p-3 p-lg-4">
             <h2 class="h5 mb-3"><i class="bi bi-truck-front me-2 text-teal"></i>Register vehicle</h2>
             <form method="post" class="vstack gap-3">
                 <input type="hidden" name="csrf_token" value="<?= e(csrf_token()) ?>">
                 <input type="hidden" name="action" value="create">
                 <div>
-                    <label class="form-label">Chassis number</label>
-                    <input class="form-control text-uppercase" name="chassis_number" minlength="6" maxlength="80" pattern="[A-Za-z0-9-]{6,80}" required>
+                    <label class="form-label">Chassis/VIN number</label>
+                    <input class="form-control text-uppercase" name="chassis_number" minlength="17" maxlength="17" pattern="[A-HJ-NPR-Za-hj-npr-z0-9]{17}" required>
                 </div>
                 <div>
                     <label class="form-label">Manufacture company</label>
@@ -95,11 +107,11 @@ require __DIR__ . '/includes/header.php';
                 <div class="row g-3">
                     <div class="col-sm-6">
                         <label class="form-label">Year</label>
-                        <input class="form-control" type="number" name="manufacture_year" min="1900" max="<?= (int) date('Y') + 1 ?>" required>
+                        <input class="form-control" type="number" name="manufacture_year" min="1901" max="<?= (int) date('Y') ?>" required>
                     </div>
                     <div class="col-sm-6">
                         <label class="form-label">Price</label>
-                        <input class="form-control" type="number" name="price" min="0" step="0.01" required>
+                        <input class="form-control" type="number" name="price" min="0.01" step="0.01" required>
                     </div>
                 </div>
                 <div>
@@ -110,9 +122,12 @@ require __DIR__ . '/includes/header.php';
             </form>
         </section>
     </div>
-    <div class="col-lg-8">
+    <div class="col-xxl-8">
         <section class="content-panel p-3 p-lg-4">
-            <h2 class="h5 mb-3"><i class="bi bi-list-check me-2 text-teal"></i>Registered vehicles</h2>
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h2 class="h5 mb-0"><i class="bi bi-list-check me-2 text-teal"></i>Registered vehicles</h2>
+                <span class="text-secondary small"><?= $total ?> total</span>
+            </div>
             <div class="table-responsive">
                 <table class="table table-hover">
                     <thead>
@@ -164,8 +179,8 @@ require __DIR__ . '/includes/header.php';
                                                     <input type="hidden" name="action" value="update">
                                                     <input type="hidden" name="vehicle_id" value="<?= (int) $vehicle['id'] ?>">
                                                     <div>
-                                                        <label class="form-label">Chassis number</label>
-                                                        <input class="form-control text-uppercase" name="chassis_number" minlength="6" maxlength="80" pattern="[A-Za-z0-9-]{6,80}" value="<?= e($vehicle['chassis_number']) ?>" required>
+                                                        <label class="form-label">Chassis/VIN number</label>
+                                                        <input class="form-control text-uppercase" name="chassis_number" minlength="17" maxlength="17" pattern="[A-HJ-NPR-Za-hj-npr-z0-9]{17}" value="<?= e($vehicle['chassis_number']) ?>" required>
                                                     </div>
                                                     <div>
                                                         <label class="form-label">Manufacture company</label>
@@ -174,11 +189,11 @@ require __DIR__ . '/includes/header.php';
                                                     <div class="row g-3">
                                                         <div class="col-sm-6">
                                                             <label class="form-label">Year</label>
-                                                            <input class="form-control" type="number" name="manufacture_year" min="1900" max="<?= (int) date('Y') + 1 ?>" value="<?= e((string) $vehicle['manufacture_year']) ?>" required>
+                                                            <input class="form-control" type="number" name="manufacture_year" min="1901" max="<?= (int) date('Y') ?>" value="<?= e((string) $vehicle['manufacture_year']) ?>" required>
                                                         </div>
                                                         <div class="col-sm-6">
                                                             <label class="form-label">Price</label>
-                                                            <input class="form-control" type="number" name="price" min="0" step="0.01" value="<?= e((string) $vehicle['price']) ?>" required>
+                                                            <input class="form-control" type="number" name="price" min="0.01" step="0.01" value="<?= e((string) $vehicle['price']) ?>" required>
                                                         </div>
                                                     </div>
                                                     <div>
@@ -226,6 +241,17 @@ require __DIR__ . '/includes/header.php';
                     </tbody>
                 </table>
             </div>
+            <?php if ($pages > 1): ?>
+                <nav aria-label="Vehicles pagination">
+                    <ul class="pagination mb-0">
+                        <?php for ($i = 1; $i <= $pages; $i++): ?>
+                            <li class="page-item <?= $i === $page ? 'active' : '' ?>">
+                                <a class="page-link" href="?page=<?= $i ?>"><?= $i ?></a>
+                            </li>
+                        <?php endfor; ?>
+                    </ul>
+                </nav>
+            <?php endif; ?>
         </section>
     </div>
 </div>
