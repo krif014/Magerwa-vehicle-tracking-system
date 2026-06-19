@@ -92,12 +92,17 @@ function valid_email_address(string $email): bool
 
 function valid_phone_number(string $phone): bool
 {
-    return (bool) preg_match('/^\+?[0-9\s-]{7,20}$/', $phone);
+    if (!preg_match('/^\+?[0-9](?:[0-9 -]*[0-9])?$/', $phone)) {
+        return false;
+    }
+
+    $digits = preg_replace('/\D+/', '', $phone);
+    return strlen($digits) >= 7 && strlen($digits) <= 15;
 }
 
 function valid_national_id(string $nationalId): bool
 {
-    return (bool) preg_match('/^[A-Za-z0-9-]{8,30}$/', $nationalId);
+    return (bool) preg_match('/^[0-9]{8,30}$/', $nationalId);
 }
 
 function valid_password(string $password): bool
@@ -110,20 +115,20 @@ function valid_password(string $password): bool
 
 function valid_chassis_number(string $chassis): bool
 {
-    return (bool) preg_match('/^[A-Z0-9-]{6,80}$/', $chassis);
+    return (bool) preg_match('/^[A-HJ-NPR-Z0-9]{17}$/', $chassis);
 }
 
 function valid_plate_number(string $plate): bool
 {
-    return (bool) preg_match('/^[A-Z0-9 -]{3,30}$/', $plate);
+    return (bool) preg_match('/^R[A-Z]{2} [0-9]{3} [A-Z]$/', $plate);
 }
 
 function valid_year(int $year): bool
 {
-    return $year >= 1900 && $year <= ((int) date('Y') + 1);
+    return $year >= 1901 && $year <= (int) date('Y');
 }
 
 function valid_price(float $price): bool
 {
-    return $price >= 0 && $price <= 9999999999999.99;
+    return $price > 0 && $price <= 9999999999999.99;
 }
