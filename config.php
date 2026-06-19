@@ -1,12 +1,30 @@
 <?php
 declare(strict_types=1);
 
-session_start();
+$dbConfig = [
+    'host' => '127.0.0.1',
+    'name' => 'magerwa_vehicle_tracking',
+    'user' => 'root',
+    'pass' => '',
+];
 
-const DB_HOST = '127.0.0.1';
-const DB_NAME = 'magerwa_vehicle_tracking';
-const DB_USER = 'root';
-const DB_PASS = '';
+$localConfigFile = __DIR__ . '/config.local.php';
+if (is_file($localConfigFile)) {
+    $localConfig = require $localConfigFile;
+
+    if (is_array($localConfig)) {
+        $dbConfig = array_replace($dbConfig, array_intersect_key($localConfig, $dbConfig));
+    }
+}
+
+define('DB_HOST', (string) $dbConfig['host']);
+define('DB_NAME', (string) $dbConfig['name']);
+define('DB_USER', (string) $dbConfig['user']);
+define('DB_PASS', (string) $dbConfig['pass']);
+
+unset($dbConfig, $localConfig, $localConfigFile);
+
+session_start();
 
 function db(): PDO
 {

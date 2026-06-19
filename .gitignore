@@ -15,4 +15,5 @@ Thumbs.db
 
 # Environment files
 .env
+config.local.php
 
