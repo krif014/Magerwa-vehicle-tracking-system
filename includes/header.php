@@ -1,7 +1,6 @@
 <?php
 $admin = $admin ?? current_admin();
 $active = $active ?? '';
-$pageHeading = trim(explode('-', $title ?? 'Dashboard')[0]);
 ?>
 <!doctype html>
 <html lang="en">
@@ -14,7 +13,7 @@ $pageHeading = trim(explode('-', $title ?? 'Dashboard')[0]);
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
-    <link href="assets/css/style.css" rel="stylesheet">
+    <link href="assets/css/style.css?v=20260620-ui2" rel="stylesheet">
 </head>
 <body>
 <div class="app-shell">
@@ -37,10 +36,6 @@ $pageHeading = trim(explode('-', $title ?? 'Dashboard')[0]);
     </aside>
     <div class="main-area">
         <nav class="topbar">
-            <div class="topbar-title">
-                <h1><?= e($pageHeading) ?></h1>
-                <span>MAGERWA Vehicle Tracking Management System</span>
-            </div>
             <div class="topbar-search">
                 <i class="bi bi-search"></i>
                 <input type="search" placeholder="Search anything..." aria-label="Search">
