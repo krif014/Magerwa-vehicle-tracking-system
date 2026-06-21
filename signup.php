@@ -18,8 +18,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if ($names === '') $errors[] = 'Names are required.';
     if (!valid_email_address($email)) $errors[] = 'A valid email address is required.';
-    if (!valid_phone_number($phone)) $errors[] = 'Phone number must contain 7 to 20 digits and may start with +.';
-    if (!valid_national_id($nationalId)) $errors[] = 'National ID must be 8 to 30 letters, numbers, or hyphens.';
+    if (!valid_phone_number($phone)) $errors[] = 'Phone number must contain 7 to 15 digits, may start with +, and may use spaces or hyphens between digits.';
+    if (!valid_national_id($nationalId)) $errors[] = 'National ID must be 8 to 30 digits.';
     if (!valid_password($password)) $errors[] = 'Password must be at least 8 characters and include uppercase, lowercase, and a number.';
     if ($password !== $confirmPassword) $errors[] = 'Passwords do not match.';
 
@@ -49,7 +49,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
-    <link href="assets/css/style.css" rel="stylesheet">
+    <link href="assets/css/style.css?v=20260620-auth" rel="stylesheet">
 </head>
 <body class="auth-bg">
 <main class="auth-shell">
@@ -98,14 +98,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <label class="form-label">Phone Number</label>
                     <div class="input-group">
                         <span class="input-group-text"><i class="bi bi-telephone"></i></span>
-                        <input type="tel" name="phone" class="form-control" placeholder="0788000000" pattern="\+?[0-9\s-]{7,20}" value="<?= e($_POST['phone'] ?? '') ?>" required>
+                        <input type="tel" name="phone" class="form-control" placeholder="0788000000" pattern="\+?[0-9][0-9 -]{5,18}[0-9]" value="<?= e($_POST['phone'] ?? '') ?>" required>
                     </div>
                 </div>
                 <div class="col-12">
                     <label class="form-label">National ID</label>
                     <div class="input-group">
                         <span class="input-group-text"><i class="bi bi-card-heading"></i></span>
-                        <input type="text" name="national_id" class="form-control" placeholder="Enter national ID number" minlength="8" maxlength="30" pattern="[A-Za-z0-9-]{8,30}" value="<?= e($_POST['national_id'] ?? '') ?>" required>
+                        <input type="text" name="national_id" class="form-control" placeholder="Enter national ID number" minlength="8" maxlength="30" pattern="[0-9]{8,30}" inputmode="numeric" value="<?= e($_POST['national_id'] ?? '') ?>" required>
                     </div>
                 </div>
                 <div class="col-md-6">
