@@ -12,6 +12,10 @@ The platform enables administrators to securely manage clients, register vehicle
 
 ![Login Page](screenshots/login.png)
 
+### Sign Up Page
+
+![Sign Up Page](screenshots/signup.png)
+
 ### Dashboard
 
 ![Dashboard](screenshots/dashboard.png)
@@ -359,18 +363,18 @@ DELETE /api.php?action=links&id=1
 
 ### Client
 
-* Valid telephone number
-* National ID validation
+* Telephone number must contain 7 to 15 real digits
+* National ID must contain 8 to 30 digits
 
 ### Vehicle
 
-* Unique chassis number
-* Valid manufacture year
-* Positive vehicle price
+* Unique 17-character chassis/VIN number
+* Manufacture year must be between 1901 and the current year
+* Vehicle price must be greater than zero
 
 ### Assignment
 
-* Unique plate number
+* Unique Rwanda-format plate number, for example `RAA 123 A`
 * Existing client required
 * Existing vehicle required
 
